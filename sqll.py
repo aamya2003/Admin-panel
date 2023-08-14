@@ -28,6 +28,7 @@ cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_settings (
         notifications INTEGER,
         login INTEGER,
+        status INTEGER,
         compulsory_subscription TEXT
     )
 ''')
@@ -126,13 +127,13 @@ def unban_channels():
 
 
 if len(cursor.execute("select * from user_settings").fetchall()) == 0:
-    cursor.execute("INSERT INTO user_settings VALUES('1', '1', '0')")
+    cursor.execute("INSERT INTO user_settings VALUES('1', '1', '1', '0')")
     conn.commit()
 
 
 
 # Job 4: Update user data based on user ID
-def update_user_settings(notifications= None, login= None, compulsory_subscription=None):
+def update_user_settings(notifications= None, login= None, status=None, compulsory_subscription=None):
     if not notifications == None:
         cursor.execute(f'''
             UPDATE user_settings
@@ -143,6 +144,12 @@ def update_user_settings(notifications= None, login= None, compulsory_subscripti
         cursor.execute(f'''
             UPDATE user_settings
             SET `login` = '{login}' ''')
+        conn.commit()
+
+    if not status == None:
+        cursor.execute(f'''
+            UPDATE user_settings
+            SET `status` = '{status}' ''')
         conn.commit()
 
     if not compulsory_subscription == None:
@@ -166,4 +173,9 @@ def get_notifications():
 # Function to display login value
 def get_login():
     cursor.execute("SELECT login FROM user_settings")
+    return cursor.fetchone()[0]
+
+
+def get_status():
+    cursor.execute("SELECT status FROM user_settings")
     return cursor.fetchone()[0]
