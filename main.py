@@ -3,11 +3,11 @@ from telebot.types import *
 from sqll import *
 import requests
 
-token = "Your_Token"
+token = "Your_Bot_Token"
 
 bot = telebot.TeleBot(token)
 
-my_id = "Your_Id"
+my_id =  int("Your_id") 
 
 msg = "" # اتركها لا تخلي اي شي
 
@@ -17,12 +17,21 @@ WelcomeMember = "اهلا بك ياعزيزي المستخدم!"  # رساله �
 
 
 
+bot.set_my_commands([
+    BotCommand("/start", "بدء")
+])
+
+
 def MangeBot():
     mrk = InlineKeyboardMarkup(
         [
             [
                 InlineKeyboardButton(text= "تفعيل التواصل", callback_data= "on communication"),
                 InlineKeyboardButton(text= "تعطيل التواصل", callback_data= "off communication"),
+            ],
+            [
+                InlineKeyboardButton(text= "تشغيل البوت", callback_data= "on bot"),
+                InlineKeyboardButton(text= "ايقاف البوت", callback_data= "off bot"),
             ],
             [
                 InlineKeyboardButton(text= "تفعيل اشعار الدخول", callback_data= "on access"),
@@ -149,16 +158,26 @@ def MainMenuDev(message:Message):
     mrk = source()
     inf = get_user_info(user_id)
     if inf and inf[1] == "mms":
-        if mrk:
-            txt = txt2
-            if not IN_channel(user_id):
-                bot.send_message(chat_id=chat_id, text= txt, reply_to_message_id= message.id, reply_markup=source())
 
+
+        # هذه وظيفة للتحقق من حاله البوت | هل البوت متوقف او نشط
+        if get_status() ==1: # اذا تساوي واحد فان البوت نشط و اذا صفر فان البوت متوقف
+
+            if mrk: # وظيف للتحقق من هل البوت يتوفر فيه اشتراك اجباري او لا
+                txt = txt2
+                if not IN_channel(user_id): # وظيفه لتحقق من حاله الاشتراك الاجباري للعضو
+                    bot.send_message(chat_id=chat_id, text= txt, reply_to_message_id= message.id, reply_markup=source())
+
+                else: # اذا كان المستخدم مشترك في القناة هنا يمكنك اضافه الادوات التي تريدها
+                    txt = txt1
+                    bot.send_message(chat_id=chat_id, text= txt, reply_to_message_id= message.id, reply_markup=source())
             else:
-                txt = txt1
-                bot.send_message(chat_id=chat_id, text= txt, reply_to_message_id= message.id, reply_markup=source())
+                bot.send_message(chat_id=chat_id, text= txt1, reply_to_message_id= message.id)
         else:
-            bot.send_message(chat_id=chat_id, text= txt1, reply_to_message_id= message.id)
+            txt = "نرجوا المعذرة, البوت متوقف مؤقتا!"
+            bot.send_message(chat_id=chat_id, text= txt, reply_to_message_id= message.id)
+        # هذا نهايه الوظيفة
+
 
     # اذا كان العضو جديد
     if not get_user_info(user_id):
@@ -168,8 +187,10 @@ def MainMenuDev(message:Message):
     insert_user(user_id, "mms")
     
 
+
+
 #  العضو اذا ارسل رساله غير ستارت
-@bot.message_handler(func= lambda message: message.text)
+@bot.message_handler(func= lambda message: bool(message.text) ==True and message.from_user.id not in [my_id])
 def MainMenuDev(message:Message):
     global msg
     msg = message
@@ -180,19 +201,32 @@ def MainMenuDev(message:Message):
     mrk = source()
     inf = get_user_info(user_id)
     if inf and inf[1] == "mms":
-        if mrk:
-            txt = txt2
-            if not IN_channel(user_id):
-                bot.send_message(chat_id=chat_id, text= txt, reply_to_message_id= message.id, reply_markup=mrk)
+
+        # هذه وظيفة للتحقق من حاله البوت | هل البوت متوقف او نشط
+        if get_status() ==1: # اذا تساوي واحد فان البوت نشط و اذا صفر فان البوت متوقف
+
+            if mrk:  # وظيف للتحقق من هل البوت يتوفر فيه اشتراك اجباري او لا
+                txt = txt2
+
+                if not IN_channel(user_id): # وظيفه لتحقق من حاله الاشتراك الاجباري للعضو
+                    bot.send_message(chat_id=chat_id, text= txt, reply_to_message_id= message.id, reply_markup=mrk)
+
+                else: # اذا كان المستخدم مشترك في القناة هنا يمكنك اضافه الادوات التي تريدها
+                    txt = txt1
+                    bot.send_message(chat_id=chat_id, text= txt, reply_to_message_id= message.id, reply_markup=mrk)
+
+                    if get_login() not in [0, "0"]: # للتحق من هل اشعارات الدخول مفعلة او لا
+                        bot.send_message(my_id, f"الرسالة = {message.text}" + "\nمن = " + f"\nالاسم = {message.from_user.first_name}" + f"\nالمعرف = {message.from_user.username}", reply_markup=HandleMessageMember())
             else:
-                txt = txt1
-                bot.send_message(chat_id=chat_id, text= txt, reply_to_message_id= message.id, reply_markup=mrk)
+                bot.send_message(chat_id=chat_id, text= txt1, reply_to_message_id= message.id)
                 if get_login() not in [0, "0"]:
-                    bot.send_message(my_id, f"الرسالة = {message.text}" + "\nمن = " + f"\nالاسم = {message.from_user.first_name}" + f"\nالمعرف = {message.from_user.username}", reply_markup=HandleMessageMember())
+                        bot.send_message(my_id, f"الرسالة = {message.text}" + "\nمن = " + f"\nالاسم = {message.from_user.first_name}" + f"\nالمعرف = {message.from_user.username}", reply_markup=HandleMessageMember())
         else:
-            bot.send_message(chat_id=chat_id, text= txt1, reply_to_message_id= message.id)
-            if get_login() not in [0, "0"]:
-                    bot.send_message(my_id, f"الرسالة = {message.text}" + "\nمن = " + f"\nالاسم = {message.from_user.first_name}" + f"\nالمعرف = {message.from_user.username}", reply_markup=HandleMessageMember())
+            txt = "نرجوا المعذرة, البوت متوقف مؤقتا!"
+            bot.send_message(chat_id=chat_id, text= txt, reply_to_message_id= message.id)
+        # هذا نهايه الوظيفة
+
+
     if not get_user_info(user_id):
         if get_notifications() not in [0, "0"]:
             txt = "تم دخول مستخدم جديد ال البوت" + f"\الايدي = {user_id} " + f"\nالاسم = {message.from_user.first_name}" + f"\nالمعرف = {message.from_user.username}"
@@ -224,12 +258,23 @@ def MAinQury(call: CallbackQuery):
         elif data == "on access":
             txt = "تم تفعيل اشعارات الدخول"
             bot.edit_message_text(text= txt, chat_id=chat_id, message_id=message.id, reply_markup=back())
-            update_user_settings(notifications=0)
+            update_user_settings(notifications=1)
 
         elif data == "off access":
             txt = "تم تعطيل اشعارات الدخول"
             bot.edit_message_text(text= txt, chat_id=chat_id, message_id=message.id, reply_markup=back())
             update_user_settings(notifications=0)
+
+
+        elif data == "on bot":
+            txt = "تشغيل البوت"
+            bot.edit_message_text(text= txt, chat_id=chat_id, message_id=message.id, reply_markup=back())
+            update_user_settings(status=1)
+
+        elif data == "off bot":
+            txt = "تم ايقاف البوت"
+            bot.edit_message_text(text= txt, chat_id=chat_id, message_id=message.id, reply_markup=back())
+            update_user_settings(status=0)
 
 
         elif data == "statistics":
