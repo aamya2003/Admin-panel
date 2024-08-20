@@ -3,11 +3,11 @@ from telebot.types import *
 from sqll import *
 import requests
 
-token = "Your_Bot_Token"
+token = "YourTokenHere"
 
 bot = telebot.TeleBot(token)
 
-my_id =  int("Your_id") 
+my_id =  int("YourId") 
 
 msg = "" # اتركها لا تخلي اي شي
 
@@ -339,39 +339,39 @@ def MAinQury(call: CallbackQuery):
 
 
         elif data == "brd all":
-            txt = "ارسل محتوى الاذاعة, انتبة يجب ان تكون نصية!"
+            txt = "ارسل محتوى الاذاعة!"
             bot.edit_message_text(text= txt, chat_id=chat_id, message_id=message.id, reply_markup=cans())
             bot.register_next_step_handler(message, brd_all)
 
 
         elif data == "brdcast me":
-            txt = "ارسل محتوى الاذاعة, انتبة يجب ان تكون نصية!"
+            txt = "ارسل محتوى الاذاعة!"
             bot.edit_message_text(text= txt, chat_id=chat_id, message_id=message.id, reply_markup=cans())
             bot.register_next_step_handler(message, broadcast)
 
         elif data == "brdcast pin me":
-            txt = "ارسل محتوى الاذاعة للتثبيت, انتبة يجب ان تكون نصية!"
+            txt = "ارسل محتوى الاذاعة للتثبيت!"
             bot.edit_message_text(text= txt, chat_id=chat_id, message_id=message.id, reply_markup=cans())
             bot.register_next_step_handler(message, broadcast_pin)
 
         elif data == "brdcast fod me":
-            txt = "ارسل محتوى الاذاعة للتحويل, انتبة يجب ان تكون نصية!"
+            txt = "ارسل محتوى الاذاعة للتحويل!"
             bot.edit_message_text(text= txt, chat_id=chat_id, message_id=message.id, reply_markup=cans())
             bot.register_next_step_handler(message, broadcast_fod)
 
 
         elif data == "brdcast ch":
-            txt = "ارسل محتوى الاذاعة, انتبة يجب ان تكون نصية!"
+            txt = "ارسل محتوى الاذاعة!"
             bot.edit_message_text(text= txt, chat_id=chat_id, message_id=message.id, reply_markup=cans())
             bot.register_next_step_handler(message, brd)
 
         elif data == "brdcast pin ch":
-            txt = "ارسل محتوى الاذاعة للتثبيت, انتبة يجب ان تكون نصية!"
+            txt = "ارسل محتوى الاذاعة للتثبيت!"
             bot.edit_message_text(text= txt, chat_id=chat_id, message_id=message.id, reply_markup=cans())
             bot.register_next_step_handler(message, brd_pin)
 
         elif data == "brdcast fod ch":
-            txt = "ارسل محتوى الاذاعة للتحويل, انتبة يجب ان تكون نصية!"
+            txt = "ارسل محتوى الاذاعة للتحويل!"
             bot.edit_message_text(text= txt, chat_id=chat_id, message_id=message.id, reply_markup=cans())
             bot.register_next_step_handler(message, brd_fod)
 
@@ -385,8 +385,8 @@ def MAinQury(call: CallbackQuery):
 
 
         elif data == "reply":
-            bot.send_message(text= "ارسل الرد: ", chat_id=chat_id,  reply_markup=cans())
-            bot.register_next_step_handler(message, rplt)
+            m = bot.send_message(text= "ارسل الرد: ", chat_id=chat_id,  reply_markup=cans())
+            bot.register_next_step_handler(message, rplt, m)
 
         elif data == "block":
             bot.send_message(text= "المستخدم تم حظرة!", chat_id=chat_id,  reply_markup=back())
@@ -483,130 +483,93 @@ def addCh(message:Message):
 
 def brd_all(message:Message):
     chat_id = message.chat.id
-    if message.text:
-        for user_id in get_total_users():
-            try:
-                bot.send_message(user_id, message.text, disable_web_page_preview=True)
-            except:
-                pass
-        for channel_id in get_total_channels():
-            try:
-                bot.send_message(channel_id, message.text, disable_web_page_preview=True)
-            except:
-                pass
+    MYBroadCast(message, get_total_users())
+    MYBroadCast(message, get_total_channels())
+    try:
         txt = "تم ارسال الاذاعة الى الكل!"
         bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
-    else:
-        txt = "يجب ان تكون الرسالة نصية!"
-        bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
+    except:
+        ...
 
 
 def broadcast(message:Message):
     chat_id = message.chat.id
-    if message.text:
-        for user_id in get_total_users():
-            try:
-                bot.send_message(user_id, message.text, disable_web_page_preview=True)
-            except:
-                pass
+    MYBroadCast(message, get_total_users())
+    try:
         txt = "تم ارسال الاذاعة الى جميع المستخدمين!"
         bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
-    else:
-        txt = "يجب ان تكون الرسالة نصية!"
-        bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
-
+    except:
+        ...
 
 
 def broadcast_pin(message:Message):
     chat_id = message.chat.id
-    if message.text:
-        for user_id in get_total_users():
-            try:
-                m = bot.send_message(user_id, message.text, disable_web_page_preview=True)
-                bot.pin_chat_message(m.chat.id, m.id)
-            except:
-                pass
-        txt = "تم ارسال الاذاعة الى جميع المستخدمين!"
+    MYBroadCast(message, get_total_users(), True)
+    try:
+        txt = "تم ارسال الاذاعه بالتثبيت الى جميع المستخدمين!"
         bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
-    else:
-        txt = "يجب ان تكون الرسالة نصية!"
-        bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
-
+    except:
+        ...
 
 def broadcast_fod(message:Message):
     chat_id = message.chat.id
-    if message.text:
-        for user_id in get_total_users():
-            try:
-                bot.forward_message(user_id, chat_id, message.id)
-            except:
-                pass
-        txt = "تم ارسال الاذاعة الى جميع المستخدمين!"
+    MyForward(message, get_total_users())
+    try:
+        txt = "تم ارسال التحويل الى جميع المستخدمين!"
         bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
-    else:
-        txt = "يجب ان تكون الرسالة نصية!"
-        bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
+    except:
+        ...
 
 
 def brd(message:Message):
     chat_id = message.chat.id
-    if message.text:
-        for channel_id in get_total_channels():
-            try:
-                bot.send_message(channel_id, message.text, disable_web_page_preview=True)
-            except:
-                pass
+    MYBroadCast(message, get_total_channels())
+    try:
         txt = "تم ارسال الاذاعة الى جميع القنوات!"
         bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
-    else:
-        txt = "يجب ان تكون الرسالة نصية!"
-        bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
-
+    except:
+        ...
 
 
 def brd_pin(message:Message):
     chat_id = message.chat.id
-    if message.text:
-        for channel_id in get_total_channels():
-            try:
-                bot.send_message(channel_id, message.text, disable_web_page_preview=True)
-            except:
-                pass
-        txt = "تم ارسال الاذاعة الى جميع القنوات!"
+    MYBroadCast(message, get_total_channels(), True)
+    try:
+        txt = "تم ارسال الاذاعه بالتثبيت الى جميع القنوات!"
         bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
-    else:
-        txt = "يجب ان تكون الرسالة نصية!"
-        bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
+    except:
+        ...
 
 
 def brd_fod(message:Message):
     chat_id = message.chat.id
-    if message.text:
-        for channel_id in get_total_channels():
-            try:
-                bot.send_message(channel_id, message.text, disable_web_page_preview=True)
-            except:
-                pass
-        txt = "تم ارسال الاذاعة الى جميع القنوات!"
-        bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
-    else:
-        txt = "يجب ان تكون الرسالة نصية!"
-        bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
+    MyForward(message, get_total_channels())
+    txt = "تم ارسال التحويل الى جميع القنوات!"
+    bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
 
 
 
 
-def rplt(message:Message):
+
+def rplt(message:Message, m:Message):
     chat_id = message.chat.id
     if message.text:
-        txt = f"الرد= {message.text}"
-        bot.send_message(text= txt, chat_id=msg.chat.id)
+        try:
+            txt = f"الرد= {message.text}"
+            bot.send_chat_action(msg.chat.id, "typing")
+            bot.send_message(text= txt, chat_id=msg.chat.id)
+        except:
+            ...
+        bot.reply_to(message, "تم الرد على الرسالة")
+        try:
+            bot.delete_message(chat_id, m.id)
+            bot.delete_message(chat_id, msg.id)
+        except:
+            ...
 
     else:
         txt = "يجب ان تكون الرسالة نصية!"
         bot.send_message(text= txt, chat_id=chat_id, reply_markup=back())
-
-
 
 
 
@@ -636,6 +599,108 @@ def MyChatMember(message:ChatMemberUpdated):
                 bot.leave_chat(chat_id)
             except:
                 pass
+
+
+
+
+
+def MyForward(message:Message, myList, pinned=None):
+    chat_id = message.chat.id
+    for peer_id in myList:
+        try:
+            m = bot.forward_message(peer_id, chat_id, message.id)
+            if pinned:
+                bot.pin_chat_message(peer_id, m.id)
+        except:
+            pass
+
+
+def MYBroadCast(message:Message, myList:list, pinned=None):
+    chat_id = message.chat.id
+    if message.text:
+        for peer_id in myList:
+            try:
+                m = bot.send_message(peer_id, message.text)
+                if pinned:
+                    bot.pin_chat_message(peer_id, m.id)
+            except:
+                ...
+    elif message.photo:
+        for peer_id in myList:
+            try:
+                m = bot.send_photo(peer_id, message.photo[-1].file_id, caption=message.caption)
+                if pinned:
+                    bot.pin_chat_message(peer_id, m.id)
+            except:
+                ...
+    elif message.video:
+        for peer_id in myList:
+            try:
+                m = bot.send_video(peer_id, message.video.file_id, caption=message.caption)
+                if pinned:
+                    bot.pin_chat_message(peer_id, m.id)
+            except:
+                ...
+    elif message.voice:
+        for peer_id in myList:
+            try:
+                m = bot.send_voice(peer_id, message.voice.file_id, caption=message.caption)
+                if pinned:
+                    bot.pin_chat_message(peer_id, m.id)
+            except:
+                ...
+    elif message.audio:
+        for peer_id in myList:
+            try:
+                m = bot.send_audio(peer_id, message.audio.file_id, caption=message.caption)
+                if pinned:
+                    bot.pin_chat_message(peer_id, m.id)
+            except:
+                ...
+    elif message.video_note:
+        for peer_id in myList:
+            try:
+                m = bot.send_video_note(peer_id, message.video_note.file_id, caption=message.caption)
+                if pinned:
+                    bot.pin_chat_message(peer_id, m.id)
+            except:
+                ...
+    elif message.document:
+        for peer_id in myList:
+            try:
+                m = bot.send_document(peer_id, message.document.file_id, caption=message.caption)
+                if pinned:
+                    bot.pin_chat_message(peer_id, m.id)
+            except:
+                ...
+    elif message.animation:
+        for peer_id in myList:
+            try:
+                m = bot.send_animation(peer_id, message.animation.file_id)
+                if pinned:
+                    bot.pin_chat_message(peer_id, m.id)
+            except:
+                ...
+    elif message.sticker:
+        for peer_id in myList:
+            try:
+                m = bot.send_sticker(peer_id, message.sticker.file_id)
+                if pinned:
+                    bot.pin_chat_message(peer_id, m.id)
+            except:
+                ...
+    elif message.sticker:
+        for peer_id in myList:
+            try:
+                m = bot.send_sticker(peer_id, message.sticker.file_id)
+                if pinned:
+                    bot.pin_chat_message(peer_id, m.id)
+            except:
+                ...
+
+
+
+
 
 
 
